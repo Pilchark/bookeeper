@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookService {
-  final String baseUrl = 'http://127.0.0.1:8000';
+  // Updated API endpoint to use the Vercel deployment
+  final String baseUrl = 'https://vercial-test.vercel.app';
   static const String BOOKS_STORAGE_KEY = 'bookeeper_books';
   
   Future<Book?> searchByIsbn(String isbn) async {
@@ -17,8 +18,6 @@ class BookService {
         Uri.parse('$baseUrl/random?isbn=$isbn'),
         headers: {
           'Accept': 'application/json',
-          // Adding origin headers can help with some CORS issues
-          'Origin': 'http://localhost'
         },
       );
       
@@ -167,7 +166,7 @@ class BookService {
     return kIsWeb;
   }
   
-  // Method to get API health/status for debugging
+  // Updated health check endpoint
   Future<bool> checkApiConnection() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/health'));

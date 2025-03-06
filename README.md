@@ -116,3 +116,56 @@ Solution for BookKeeper App
 - Enhance BookService to use SharedPreferences for storing books
 - Update the SearchScreen to show a status selection dialog
 - Modify BookList to read from local storage instead of mock data
+
+## Deployment Guide
+
+### Deploying on Vercel
+
+#### Prerequisites
+- Node.js and npm installed
+- Vercel CLI: `npm i -g vercel`
+- Flutter SDK
+
+#### Build the Flutter Web App
+1. Make sure your Flutter is set up for web:
+   ```bash
+   flutter config --enable-web
+   ```
+
+2. Build the web version:
+   ```bash
+   flutter build web --release
+   ```
+
+#### Deploy to Vercel
+1. Initialize a Vercel project in the build directory:
+   ```bash
+   cd build/web
+   vercel login
+   vercel
+   ```
+
+2. Follow the interactive prompts:
+   - Set up and deploy: `Y`
+   - Select your account
+   - Link to existing project: `N`
+   - Project name: `bookeeper-app` (or your preferred name)
+   - Framework preset: `Other`
+   - Override settings: `N`
+
+3. Your app will be deployed and a URL will be provided.
+
+#### Configuration
+1. For custom domains, go to the Vercel dashboard > your project > Settings > Domains
+2. For environment variables, go to Settings > Environment Variables
+
+#### Production API Update
+The app is configured to use the production API at: `https://vercial-test.vercel.app/random`
+
+#### Continuous Deployment
+For automatic deployments when you push to GitHub:
+1. Connect your GitHub repo to Vercel in the dashboard
+2. Configure build settings:
+   - Build Command: `flutter build web --release`
+   - Output Directory: `build/web`
+   - Install Command: Leave empty
