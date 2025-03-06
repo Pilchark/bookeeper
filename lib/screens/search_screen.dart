@@ -94,7 +94,7 @@ class _SearchScreenState extends State<SearchScreen> {
         trailing: ElevatedButton(
           child: Text('Add'),
           onPressed: () {
-            _addBookToWanted(book);
+            _showStatusSelectionDialog(book);
           },
         ),
       ),
@@ -224,5 +224,85 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       },
     );
+  }
+
+  void _showStatusSelectionDialog(Book book) {
+    String selectedStatus = 'wanted'; // Default value
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add "${book.title}"'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Select reading status:'),
+                  RadioListTile<String>(
+                    title: Text('Want to Read'),
+                    value: 'wanted',
+                    groupValue: selectedStatus,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStatus = value!;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: Text('Currently Reading'),
+                    value: 'reading',
+                    groupValue: selectedStatus,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStatus = value!;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: Text('Finished'),
+                    value: 'finished',
+                    groupValue: selectedStatus,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStatus = value!;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _addBookWithStatus(book, selectedStatus);
+                Navigator.pop(context);
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _addBookWithStatus(Book book, String status) {
+    _bookService.addBookToCollection(book, status).then((success) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${book.title} added to your "$status" list')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add book'), backgroundColor: Colors.red),
+        );
+      }
+    });
   }
 }

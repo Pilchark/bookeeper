@@ -105,3 +105,14 @@ CREATE TABLE books (
 - Reading notes/highlights
 
 This design provides a foundation for a functional book management application while maintaining simplicity and essential features.
+
+
+## release notes
+
+### 0.0.1
+
+Solution for BookKeeper App
+- Update the Book model to include a status field
+- Enhance BookService to use SharedPreferences for storing books
+- Update the SearchScreen to show a status selection dialog
+- Modify BookList to read from local storage instead of mock data

@@ -17,6 +17,7 @@ class Book {
   final String? isbn;
   final String? description;
   final DateTime? createdAt;
+  final String status; // New field for tracking reading status
 
   Book({
     required this.id,
@@ -29,6 +30,7 @@ class Book {
     this.isbn,
     this.description,
     this.createdAt,
+    this.status = 'wanted', // Default status is 'wanted'
   });
   
   factory Book.fromJson(Map<String, dynamic> json) {
@@ -44,7 +46,26 @@ class Book {
           : null,
       isbn: json['isbn'],
       description: json['description'],
-      createdAt: DateTime.now(),
+      createdAt: json['createdAt'] != null 
+          ? DateTime.tryParse(json['createdAt'])
+          : DateTime.now(),
+      status: json['status'] ?? 'wanted',
     );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'author': author,
+      'coverUrl': coverUrl,
+      'language': language,
+      'publisher': publisher,
+      'published_date': publishedDate?.toIso8601String(),
+      'isbn': isbn,
+      'description': description,
+      'createdAt': createdAt?.toIso8601String(),
+      'status': status,
+    };
   }
 }
