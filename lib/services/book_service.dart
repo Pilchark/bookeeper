@@ -84,8 +84,19 @@ class BookService {
       // Convert existing books to objects
       List<Book> books = booksJson.map((json) => Book.fromJson(jsonDecode(json))).toList();
       
-      // Remove the book if it already exists (to avoid duplicates)
-      books.removeWhere((existingBook) => existingBook.id == book.id);
+      // Remove the book if it already exists with ANY status
+      // This ensures we don't have duplicate books with different statuses
+      if (book.isbn != null && book.isbn!.isNotEmpty) {
+        // If we have ISBN, use that for more accurate identification
+        books.removeWhere((existingBook) => existingBook.isbn == book.isbn);
+      } else {
+        // Otherwise, use a combination of title and author
+        books.removeWhere(
+          (existingBook) => 
+              existingBook.title == book.title && 
+              existingBook.author == book.author
+        );
+      }
       
       // Add the new book with status
       books.add(bookWithStatus);

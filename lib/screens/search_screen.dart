@@ -149,19 +149,6 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
   
-  void _addBookToWanted(Book book) {
-    _bookService.addBookToCollection(book, 'wanted').then((success) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${book.title} added to your "Want to Read" list')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add book'), backgroundColor: Colors.red),
-        );
-      }
-    });
-  }
 
   void _showScanOptions() {
     showModalBottomSheet(
