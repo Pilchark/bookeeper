@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(BookkeeperApp());
+  runApp(BookeeperApp());
 }
 
-class BookkeeperApp extends StatelessWidget {
+class BookeeperApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bookkeeper',
+      title: 'Bookeeper',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         brightness: Brightness.light,

@@ -59,11 +59,11 @@ class BookList extends StatelessWidget {
       ];
     } else if (category == 'done') {
       return [
-        Book(id: '3', title: 'The Pragmatic Programmer', author: 'Andrew Hunt'),
+        Book(id: '3', title: 'The Pragmatic Programmer', author: 'Andrew Hunt', isbn: '9780201616224', description:  "test description"),
       ];
     } else {
       return [
-        Book(id: '4', title: 'Refactoring', author: 'Martin Fowler'),
+        Book(id: '4', title: 'Refactoring', author: 'Martin Fowler' , isbn: '9780134757599', description:  "test description"),
       ];
     }
   }
