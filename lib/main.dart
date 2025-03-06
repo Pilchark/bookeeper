@@ -1,26 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/book_provider.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(BookkeeperApp());
 }
 
-class MyApp extends StatelessWidget {
+class BookkeeperApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => BookProvider(),
-      child: MaterialApp(
-        title: '个人书单',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MaterialApp(
+      title: 'Bookkeeper',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
         ),
-        home: HomeScreen(),
-        debugShowCheckedModeBanner: false,
+        tabBarTheme: TabBarTheme(
+          labelColor: Colors.blue, // Color of selected tab text
+          unselectedLabelColor: Colors.black54, // Color of unselected tab text
+          indicator: BoxDecoration(
+            color: Colors.white, // White background for tabs
+          ),
+        ),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      darkTheme: ThemeData.dark().copyWith(
+        primaryColor: Colors.blue,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.blue,
+          secondary: Colors.blueAccent,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.grey[900],
+          foregroundColor: Colors.white,
+        ),
+      ),
+      themeMode: ThemeMode.system,
+      home: HomeScreen(),
     );
   }
 }

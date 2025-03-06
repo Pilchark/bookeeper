@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/book_provider.dart';
 import '../models/book.dart';
+import '../services/book_service.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -9,176 +8,221 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  final _searchController = TextEditingController();
-  bool _isIsbnSearch = true;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
+  final TextEditingController _searchController = TextEditingController();
+  final BookService _bookService = BookService();
+  bool _isSearching = false;
+  Book? _foundBook;
+  String? _errorMessage;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('搜索书籍'),
+        title: Text('Search Books'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
               children: [
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: _isIsbnSearch ? 'ISBN搜索' : '书名搜索',
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.search),
-                      onPressed: _performSearch,
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search for books...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    border: OutlineInputBorder(),
+                    onSubmitted: (value) {
+                      _performSearch(value);
+                    },
                   ),
-                  onSubmitted: (_) => _performSearch(),
                 ),
-                SwitchListTile(
-                  title: Text('使用ISBN搜索'),
-                  value: _isIsbnSearch,
-                  onChanged: (value) {
-                    setState(() {
-                      _isIsbnSearch = value;
-                    });
+                IconButton(
+                  icon: Icon(Icons.qr_code_scanner),
+                  onPressed: () {
+                    _showScanOptions();
                   },
                 ),
               ],
             ),
           ),
           Expanded(
-            child: Consumer<BookProvider>(
-              builder: (context, bookProvider, child) {
-                if (bookProvider.isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                
-                if (bookProvider.searchResults.isEmpty) {
-                  return Center(child: Text('无搜索结果'));
-                }
-                
-                return ListView.builder(
-                  itemCount: bookProvider.searchResults.length,
-                  itemBuilder: (context, index) {
-                    final book = bookProvider.searchResults[index];
-                    return ListTile(
-                      title: Text(book.title),
-                      subtitle: Text('${book.author} - ${book.publishedYear}'),
-                      trailing: IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => _addBook(book),
-                      ),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: Text(book.title),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('作者: ${book.author}'),
-                                  Text('ISBN: ${book.isbn}'),
-                                  Text('出版年: ${book.publishedYear}'),
-                                  SizedBox(height: 8),
-                                  Text('简介: ${book.description}'),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                child: Text('关闭'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                              TextButton(
-                                child: Text('添加到书单'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _addBook(book);
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+            child: _buildSearchResults(),
           ),
         ],
       ),
     );
   }
 
-  void _performSearch() {
-    final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-
-    if (_isIsbnSearch) {
-      context.read<BookProvider>().searchBooksByIsbn(query);
+  Widget _buildSearchResults() {
+    if (_isSearching) {
+      return Center(child: CircularProgressIndicator());
+    } else if (_errorMessage != null) {
+      return Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.red)));
+    } else if (_foundBook != null) {
+      return _buildBookResult(_foundBook!);
     } else {
-      context.read<BookProvider>().searchBooksByQuery(query);
+      return Center(child: Text('Enter a book name or ISBN to search'));
     }
   }
-
-  void _addBook(Book book) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('选择阅读状态'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+  
+  Widget _buildBookResult(Book book) {
+    return Card(
+      margin: EdgeInsets.all(8),
+      child: ListTile(
+        leading: book.coverUrl != null
+            ? Image.network(
+                book.coverUrl!,
+                width: 50,
+                errorBuilder: (_, __, ___) => Icon(Icons.book, size: 50),
+              )
+            : Icon(Icons.book, size: 50),
+        title: Text(book.title),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              title: Text('想看'),
-              onTap: () {
-                context.read<BookProvider>().addBook(
-                  book.copyWith(status: ReadingStatus.toRead),
-                );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('已添加到想看列表')),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('阅读中'),
-              onTap: () {
-                context.read<BookProvider>().addBook(
-                  book.copyWith(status: ReadingStatus.reading),
-                );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('已添加到阅读中列表')),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('已读'),
-              onTap: () {
-                context.read<BookProvider>().addBook(
-                  book.copyWith(status: ReadingStatus.finished),
-                );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('已添加到已读列表')),
-                );
-              },
-            ),
+            Text(book.author),
+            if (book.publisher != null) Text('Publisher: ${book.publisher}'),
+            if (book.isbn != null) Text('ISBN: ${book.isbn}'),
           ],
         ),
+        isThreeLine: true,
+        trailing: ElevatedButton(
+          child: Text('Add'),
+          onPressed: () {
+            _addBookToWanted(book);
+          },
+        ),
       ),
+    );
+  }
+
+  void _performSearch(String query) {
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+      _foundBook = null;
+    });
+    
+    _bookService.searchByTitle(query).then((books) {
+      setState(() {
+        _isSearching = false;
+        if (books.isNotEmpty) {
+          _foundBook = books.first;
+        } else {
+          _errorMessage = 'No books found for "$query"';
+        }
+      });
+    }).catchError((error) {
+      setState(() {
+        _isSearching = false;
+        _errorMessage = 'Error searching: $error';
+      });
+    });
+  }
+
+  void _searchByIsbn(String isbn) {
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+      _foundBook = null;
+    });
+    
+    _bookService.searchByIsbn(isbn).then((book) {
+      setState(() {
+        _isSearching = false;
+        if (book != null) {
+          _foundBook = book;
+        } else {
+          _errorMessage = 'No book found with ISBN "$isbn"';
+        }
+      });
+    }).catchError((error) {
+      setState(() {
+        _isSearching = false;
+        _errorMessage = 'Error searching: $error';
+      });
+    });
+  }
+  
+  void _addBookToWanted(Book book) {
+    _bookService.addBookToCollection(book, 'wanted').then((success) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${book.title} added to your "Want to Read" list')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add book'), backgroundColor: Colors.red),
+        );
+      }
+    });
+  }
+
+  void _showScanOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Scan ISBN with camera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // In a real app, this would open the camera scanner
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.keyboard),
+                title: Text('Enter ISBN manually'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showIsbnInputDialog();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showIsbnInputDialog() {
+    final TextEditingController isbnController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Enter ISBN'),
+          content: TextField(
+            controller: isbnController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(hintText: 'ISBN number'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (isbnController.text.isNotEmpty) {
+                  _searchByIsbn(isbnController.text);
+                }
+              },
+              child: Text('Search'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
