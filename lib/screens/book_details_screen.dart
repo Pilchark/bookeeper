@@ -117,7 +117,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
               children: [
                 _buildStatusButton('wanted', 'Want to Read'),
                 _buildStatusButton('reading', 'Reading'),
-                _buildStatusButton('done', 'Finished'),
+                _buildStatusButton('finished', 'Finished'),
               ],
             ),
           ],

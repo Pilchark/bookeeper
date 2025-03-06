@@ -40,7 +40,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> with SingleTickerProv
           tabs: [
             Tab(text: 'Wanted'),
             Tab(text: 'Reading'),
-            Tab(text: 'Done'),
+            Tab(text: 'Finished'),
           ],
         ),
       ),
@@ -49,7 +49,7 @@ class _BookshelfScreenState extends State<BookshelfScreen> with SingleTickerProv
         children: [
           BookList(category: 'wanted'),
           BookList(category: 'reading'),
-          BookList(category: 'done'),
+          BookList(category: 'finished'),
         ],
       ),
     );
