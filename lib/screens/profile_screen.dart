@@ -8,7 +8,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTheme = 'Default';
-  final String _appVersion = '1.0.0';
+  final String _appVersion = '0.0.1';
 
   @override
   Widget build(BuildContext context) {
